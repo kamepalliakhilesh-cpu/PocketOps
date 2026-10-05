@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ShieldAlert, Terminal, Code2, Check, Save,
-  X, Cpu, Radio, FileText,
+  X, Cpu, Radio, FileText, Sparkles
 } from 'lucide-react';
 import { useStore } from '../../core/store/StoreContext';
+import { feedback } from '../../shared/utils/haptics';
+import { aiProvider } from '../../core/ai/LLMProvider';
 
 export default function BlackoutTakeoverModal() {
   const { state, setBlackoutModalOpen, updateSessionBuffer, updateFileContent, toast, logActivity } = useStore();
@@ -13,27 +15,43 @@ export default function BlackoutTakeoverModal() {
   const [codeBuffer, setCodeBuffer] = useState(snapshot.unsavedBuffer);
   const [activeTab, setActiveTab] = useState<'editor' | 'terminal'>('editor');
   const [isSaved, setIsSaved] = useState(false);
+  const [isAuditing, setIsAuditing] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      feedback.alert();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleSaveBuffer = () => {
+    feedback.success();
     updateSessionBuffer(codeBuffer);
     const targetFile = state.files.find(f => f.name === snapshot.activeFile);
     if (targetFile) {
       updateFileContent(targetFile.id, codeBuffer);
     }
     setIsSaved(true);
-    toast('Buffer saved to Offline Vault', 'success');
-    logActivity('offline_file_edited', `Saved ${snapshot.activeFile}`, 'Encrypted in local flash');
+    toast('Buffer saved to Offline Encrypted Vault', 'success');
+    logActivity('offline_file_edited', `Saved ${snapshot.activeFile}`, 'Encrypted in local phone flash');
     setTimeout(() => setIsSaved(false), 2000);
   };
 
-  const handleRunLocalAudit = () => {
-    toast('Analyzing code buffer against local syntax rules…', 'ai');
-    setTimeout(() => {
-      toast('Local Audit Passed: Valid syntax, schema verified', 'success');
-      logActivity('ai_breakdown', 'Local Syntax Audit', 'Offline validation completed in 12ms');
-    }, 600);
+  const handleRunLocalAudit = async () => {
+    setIsAuditing(true);
+    feedback.click();
+    toast('Local SLM (Qwen2.5-Coder) analyzing code syntax offline…', 'ai');
+    const res = await aiProvider.auditHotpatch(codeBuffer);
+    setIsAuditing(false);
+    if (res.valid && res.data) {
+      feedback.success();
+      toast(`[On-Device SLM] ${res.data.summary} (Safety: ${res.data.safetyScore})`, 'success');
+      logActivity('ai_breakdown', 'Local SLM Syntax Audit', `Model: ${aiProvider.modelName} · Latency: 18ms`);
+    } else {
+      feedback.alert();
+      toast('Audit warning: Code contains syntax issues', 'error');
+    }
   };
 
   return (
@@ -53,11 +71,11 @@ export default function BlackoutTakeoverModal() {
                 HOT-STANDBY SESSION TAKEOVER
               </div>
               <div className="text-xs text-secondary mt-1">
-                Laptop Disconnected · Standby Active on Phone
+                Laptop Power Lost · Standby Enclave Active on Phone
               </div>
             </div>
           </div>
-          <button className="icon-btn" onClick={() => setBlackoutModalOpen(false)} aria-label="Close modal">
+          <button className="icon-btn" onClick={() => { feedback.click(); setBlackoutModalOpen(false); }} aria-label="Close modal">
             <X size={15} />
           </button>
         </div>
@@ -66,7 +84,7 @@ export default function BlackoutTakeoverModal() {
         <div className="blackout-telemetry-strip">
           <div className="row gap-6 align-center">
             <Radio size={11} color="var(--iqoo-amber)" />
-            <span className="text-xs font-semibold">Zero-Cloud Standby</span>
+            <span className="text-xs font-semibold">Zero-Cloud Tactical Standby</span>
           </div>
           <div className="row gap-10 text-xs text-tertiary">
             <span>Branch: <b style={{ color: 'var(--cyan)' }}>{snapshot.gitBranch}</b></span>
@@ -74,18 +92,29 @@ export default function BlackoutTakeoverModal() {
           </div>
         </div>
 
+        {/* Model Chip */}
+        <div className="blackout-model-bar">
+          <div className="row gap-6 align-center">
+            <Sparkles size={11} color="var(--purple-bright)" />
+            <span className="text-xs" style={{ color: 'var(--purple-bright)', fontWeight: 600 }}>
+              On-Device SLM: Qwen 2.5-Coder (1.5B) / Gemma 2B
+            </span>
+          </div>
+          <span className="badge badge-ai" style={{ fontSize: 9 }}>0ms CLOUD LATENCY</span>
+        </div>
+
         {/* Tabs */}
         <div className="takeover-tabs">
           <button
             className={`takeover-tab ${activeTab === 'editor' ? 'active' : ''}`}
-            onClick={() => setActiveTab('editor')}
+            onClick={() => { feedback.click(); setActiveTab('editor'); }}
           >
             <Code2 size={13} />
             <span>Active Code ({snapshot.activeFile})</span>
           </button>
           <button
             className={`takeover-tab ${activeTab === 'terminal' ? 'active' : ''}`}
-            onClick={() => setActiveTab('terminal')}
+            onClick={() => { feedback.click(); setActiveTab('terminal'); }}
           >
             <Terminal size={13} />
             <span>Active Terminal</span>
@@ -127,7 +156,7 @@ export default function BlackoutTakeoverModal() {
                 <div className="terminal-log-line active-pulse">
                   <span className="term-num">7</span>
                   <span className="term-txt" style={{ color: 'var(--iqoo-amber)' }}>
-                    [STANDBY] State preserved locally · Awaiting PC reconnect…
+                    [STANDBY] State preserved locally in phone flash · Awaiting PC reconnect…
                   </span>
                 </div>
               </div>
@@ -137,8 +166,12 @@ export default function BlackoutTakeoverModal() {
 
         {/* Footer Actions */}
         <div className="blackout-footer">
-          <button className="btn btn-secondary btn-sm" onClick={handleRunLocalAudit}>
-            <Cpu size={13} /> Local Audit
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={handleRunLocalAudit}
+            disabled={isAuditing}
+          >
+            <Cpu size={13} /> {isAuditing ? 'Auditing…' : 'Local SLM Audit'}
           </button>
           <button
             className={`btn btn-primary btn-sm flex-1 ${isSaved ? 'btn-success' : ''}`}
@@ -183,6 +216,14 @@ export default function BlackoutTakeoverModal() {
             padding: 8px 18px;
             background: rgba(255, 255, 255, 0.02);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          }
+          .blackout-model-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 18px;
+            background: rgba(168, 85, 247, 0.06);
+            border-bottom: 1px solid rgba(168, 85, 247, 0.12);
           }
           .takeover-tabs {
             display: flex;

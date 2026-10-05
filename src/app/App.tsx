@@ -22,7 +22,23 @@ import FileEditorModal from '../features/files/FileEditorModal';
 function AppRoutes() {
   const loc = useLocation();
   const contentRef = useRef<HTMLDivElement>(null);
-  const { state, closeFileEditor } = useStore();
+  const { state, closeFileEditor, setJudgeStage } = useStore();
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const hashParts = window.location.hash.split('?');
+    const hashParams = hashParts.length > 1 ? new URLSearchParams(hashParts[1]) : null;
+    const demo = searchParams.get('demo') || hashParams?.get('demo');
+    if (demo === 'blackout') {
+      setJudgeStage('blackout');
+    } else if (demo === 'resync') {
+      setJudgeStage('resync_merge');
+    } else if (demo === 'offline') {
+      setJudgeStage('offline_ops');
+    } else if (demo === 'normal') {
+      setJudgeStage('normal');
+    }
+  }, [setJudgeStage]);
 
   useEffect(() => {
     contentRef.current?.scrollTo({ top: 0 });

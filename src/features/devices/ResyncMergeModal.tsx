@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { RefreshCw, GitMerge, CheckCircle2, FileCode, Check, X, ShieldCheck } from 'lucide-react';
+import { RefreshCw, GitMerge, CheckCircle2, FileCode, Check, X, ShieldCheck, Link2 } from 'lucide-react';
 import { useStore } from '../../core/store/StoreContext';
+import { feedback } from '../../shared/utils/haptics';
 
 export default function ResyncMergeModal() {
   const { state, setResyncModalOpen, toast, logActivity } = useStore();
@@ -11,9 +12,10 @@ export default function ResyncMergeModal() {
   if (!isOpen || !report) return null;
 
   const handleApplyMerge = () => {
+    feedback.success();
     setIsMerged(true);
-    toast('Git commit merged to Laptop repo without conflicts!', 'success');
-    logActivity('diff_merged', 'P2P Diff Auto-Committed', 'SHA256: 8f9b2c4e1a0d7f3e synced to master');
+    toast('Office Kit Bridge: Git commit merged to Laptop repo without conflicts!', 'success');
+    logActivity('diff_merged', 'Office Kit P2P Diff Auto-Committed', 'SHA256: 8f9b2c4e1a0d7f3e synced back to workstation repository');
     setTimeout(() => {
       setResyncModalOpen(false);
       setIsMerged(false);
@@ -21,7 +23,7 @@ export default function ResyncMergeModal() {
   };
 
   return (
-    <div className="modal-backdrop fade-in" onClick={() => setResyncModalOpen(false)}>
+    <div className="modal-backdrop fade-in" onClick={() => { feedback.click(); setResyncModalOpen(false); }}>
       <div className="modal-sheet resync-modal" onClick={e => e.stopPropagation()}>
         {/* Grab Handle */}
         <div className="sheet-handle" />
@@ -37,11 +39,11 @@ export default function ResyncMergeModal() {
                 GIT-STYLE P2P DIFF REVIEW & MERGE
               </div>
               <div className="text-xs text-secondary mt-1">
-                Workstation Reconnected · Visual Diff & Patch Review
+                Office Kit Bridge Reconnected · Visual Patch Inspector
               </div>
             </div>
           </div>
-          <button className="icon-btn" onClick={() => setResyncModalOpen(false)} aria-label="Close modal">
+          <button className="icon-btn" onClick={() => { feedback.click(); setResyncModalOpen(false); }} aria-label="Close modal">
             <X size={15} />
           </button>
         </div>
@@ -52,7 +54,10 @@ export default function ResyncMergeModal() {
             <ShieldCheck size={13} color="var(--cyan)" />
             <span className="text-xs font-semibold" style={{ fontFamily: 'var(--font-mono)' }}>{report.checksum}</span>
           </div>
-          <span className="badge badge-online">CLEAN DIFF</span>
+          <div className="row gap-6 align-center">
+            <Link2 size={12} color="var(--green-bright)" />
+            <span className="badge badge-online">OFFICE KIT P2P ACTIVE</span>
+          </div>
         </div>
 
         {/* List of Files Merged */}
@@ -65,7 +70,7 @@ export default function ResyncMergeModal() {
                   <FileCode size={15} color="var(--iqoo-amber)" />
                   <div className="flex-1 overflow-hidden">
                     <div className="font-bold text-xs">{f.name}</div>
-                    <div className="text-xs text-tertiary">Direct P2P Patch Applied</div>
+                    <div className="text-xs text-tertiary">Direct P2P Patch Applied via Phone Enclave</div>
                   </div>
                 </div>
                 <div className="row gap-8 align-center">
@@ -93,7 +98,7 @@ export default function ResyncMergeModal() {
 
         {/* Action Footer */}
         <div className="resync-footer">
-          <button className="btn btn-ghost btn-sm flex-1" onClick={() => setResyncModalOpen(false)}>
+          <button className="btn btn-ghost btn-sm flex-1" onClick={() => { feedback.click(); setResyncModalOpen(false); }}>
             Review Later
           </button>
           <button

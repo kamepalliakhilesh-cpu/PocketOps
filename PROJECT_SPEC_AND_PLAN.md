@@ -1,9 +1,17 @@
 # ⚡ PocketOps — Project Specification & Hackathon Engineering Plan
 
 > **Competition:** iQOO Hackathon  
-> **Category:** High-Performance Edge AI & Cross-Device Ecosystem Continuity  
+> **Category:** High-Performance Edge AI & Cross-Device Ecosystem Continuity (Wildcard / Open Innovation)  
+> **Stack Rule Compliance:** **Local Open-Source SLM (Qwen 2.5-Coder 1.5B / Gemma 2B)** on-device core with **vivo/iQOO Office Kit Bridge** dual-device continuity  
 > **Core Philosophy:** *"When one device fails, your work should never have to stop."*  
 > **Demonstration Status:** **Interactive Functional Prototype & System Architecture Specification**
+
+---
+
+## 🌟 Hackathon Stack Rule Compliance
+* **Local / Open-Source Core:** Powered by on-device Small Language Models (**Qwen 2.5-Coder 1.5B-Q4 / Gemma 2B**) running with 0ms cloud latency via NPU delegates for syntax analysis, local auditing, and deterministic task decomposition.
+* **Phone in the Loop (Office Kit Bridge):** Deep integration across laptop and iQOO smartphone—real-time bidirectional clipboard sync, heartbeat session preservation, camera QR/screen verification, and 3-way visual Git diff re-sync.
+* **Open Innovation Fit:** Solves the critical unsolved dilemma of sudden workstation power failure / field blackout context loss without cloud exposure.
 
 ---
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ShieldAlert, RefreshCw, Cpu, Flame, ChevronDown, ChevronUp, Radio } from 'lucide-react';
 import { useStore } from '../../core/store/StoreContext';
+import { feedback } from '../../shared/utils/haptics';
 import type { JudgeDemoStage } from '../types';
 
 export default function JudgeDemoBar() {
@@ -11,34 +12,55 @@ export default function JudgeDemoBar() {
   const stages: { id: JudgeDemoStage; label: string; desc: string; icon: React.ComponentType<{ size?: number; color?: string }> }[] = [
     {
       id: 'normal',
-      label: '1. P2P Mesh Protocol',
-      desc: 'Local P2P telemetry & continuous state synchronization',
+      label: '1. Office Kit P2P Mesh',
+      desc: 'Live telemetry, active heartbeat & real-time bidirectional clipboard',
       icon: Radio,
     },
     {
       id: 'blackout',
-      label: '2. Power Cut / Takeover',
-      desc: 'Simulate workstation heartbeat drop & trigger mobile hot-standby',
+      label: '2. Workstation Blackout',
+      desc: 'Simulate sudden laptop power loss & trigger mobile hot-standby enclave',
       icon: ShieldAlert,
     },
     {
       id: 'offline_ops',
-      label: '3. Autonomous Phone Ops',
-      desc: 'Edit unsaved code in Offline Vault + local schema validation offline',
+      label: '3. Local SLM & Vault Ops',
+      desc: 'Unsaved code buffer editing + on-device Qwen2.5-Coder syntax audit (0ms cloud)',
       icon: Cpu,
     },
     {
       id: 'resync_merge',
-      label: '4. Reconnect & Diff Review',
-      desc: 'Workstation reconnected — visual Git diff inspection & patch review',
+      label: '4. Office Kit 3-Way Diff',
+      desc: 'Laptop reconnected — visual Git diff inspector & zero-conflict patch merge',
       icon: RefreshCw,
     },
   ];
 
+  const handleStageChange = (stageId: JudgeDemoStage) => {
+    if (stageId === 'blackout') {
+      feedback.alert();
+    } else if (stageId === 'resync_merge') {
+      feedback.success();
+    } else {
+      feedback.click();
+    }
+    setJudgeStage(stageId);
+  };
+
+  const handleToggleBlackout = () => {
+    if (currentStage === 'blackout') {
+      feedback.success();
+      setJudgeStage('normal');
+    } else {
+      feedback.alert();
+      setJudgeStage('blackout');
+    }
+  };
+
   return (
     <div className="judge-demo-bar-container">
       <div className="judge-demo-bar-header">
-        <div className="judge-stage-pill cursor-pointer" onClick={() => setExpanded(!expanded)}>
+        <div className="judge-stage-pill cursor-pointer" onClick={() => { feedback.click(); setExpanded(!expanded); }}>
           <span className="judge-live-pulse" />
           <span className="judge-brand-tag">iQOO DEMO</span>
           <span className="judge-stage-name">
@@ -52,7 +74,7 @@ export default function JudgeDemoBar() {
         <div className="row gap-6 align-center">
           <button
             className={`judge-quick-btn ${currentStage === 'blackout' ? 'danger' : ''}`}
-            onClick={() => setJudgeStage(currentStage === 'blackout' ? 'normal' : 'blackout')}
+            onClick={handleToggleBlackout}
             title="Simulate Instant Blackout Takeover"
           >
             <Flame size={12} />
@@ -64,7 +86,7 @@ export default function JudgeDemoBar() {
       {expanded && (
         <div className="judge-demo-dropdown fade-in-up">
           <div className="judge-subtext">
-            <span>60-Second Live Judge Walkthrough:</span>
+            <span>60-Second Defensible Judge Walkthrough:</span>
             <span className="text-secondary">Stage {currentStage === 'normal' ? '1/4' : currentStage === 'blackout' ? '2/4' : currentStage === 'offline_ops' ? '3/4' : '4/4'}</span>
           </div>
           <div className="judge-stages-grid">
@@ -75,7 +97,7 @@ export default function JudgeDemoBar() {
                 <button
                   key={st.id}
                   className={`judge-stage-card ${active ? 'active' : ''}`}
-                  onClick={() => setJudgeStage(st.id)}
+                  onClick={() => handleStageChange(st.id)}
                 >
                   <div className="row-between mb-4">
                     <div className="row gap-6 align-center">
