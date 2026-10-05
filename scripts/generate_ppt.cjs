@@ -1,13 +1,13 @@
 const pptxgen = require('pptxgenjs');
 const path = require('path');
-const fs = require('fs');
 
 async function createDeck() {
   const pptx = new pptxgen();
-  pptx.layout = 'LAYOUT_16x9';
+  pptx.layout = 'LAYOUT_16x9'; // 13.33" x 7.5"
 
   const BG_COLOR = '0B0E17';
   const CARD_BG = '141826';
+  const CARD_BORDER = '22283A';
   const ACCENT_ORANGE = 'FF5500';
   const ACCENT_CYAN = '00E5FF';
   const ACCENT_PURPLE = 'A855F7';
@@ -15,36 +15,35 @@ async function createDeck() {
   const TEXT_WHITE = 'FFFFFF';
   const TEXT_MUTED = '94A3B8';
 
-  const screenshotsDir = path.resolve(__dirname, '../screenshots');
-
-  // Helper for slide base styling
+  // Standard slide background and header helper
   function addBaseSlide(title, subtitle, category = 'iQOO HACKATHON · DEVELOPER TOOLS') {
     const slide = pptx.addSlide();
     slide.background = { color: BG_COLOR };
 
-    // Top Header Badge
+    // Category Tag
     slide.addText(category, {
-      x: 0.8, y: 0.4, w: 8.0, h: 0.3,
+      x: 0.8, y: 0.4, w: 8.0, h: 0.25,
       fontSize: 10, bold: true, color: ACCENT_ORANGE, fontFace: 'Arial',
       letterSpacing: 1.5,
     });
 
     // Title
     slide.addText(title, {
-      x: 0.8, y: 0.65, w: 11.5, h: 0.6,
+      x: 0.8, y: 0.65, w: 11.73, h: 0.55,
       fontSize: 22, bold: true, color: TEXT_WHITE, fontFace: 'Arial',
     });
 
+    // Subtitle
     if (subtitle) {
       slide.addText(subtitle, {
-        x: 0.8, y: 1.25, w: 11.5, h: 0.35,
-        fontSize: 12, color: TEXT_MUTED, fontFace: 'Arial',
+        x: 0.8, y: 1.22, w: 11.73, h: 0.35,
+        fontSize: 11.5, color: TEXT_MUTED, fontFace: 'Arial',
       });
     }
 
     // Footer
     slide.addText('⚡ PocketOps — "When one device fails, your work should never have to stop."', {
-      x: 0.8, y: 7.0, w: 10.0, h: 0.3,
+      x: 0.8, y: 6.95, w: 11.73, h: 0.25,
       fontSize: 9, color: '475569', fontFace: 'Arial',
     });
 
@@ -52,32 +51,31 @@ async function createDeck() {
   }
 
   // -------------------------------------------------------------
-  // SLIDE 1: TITLE
+  // SLIDE 1: TITLE SLIDE
   // -------------------------------------------------------------
   const s1 = pptx.addSlide();
   s1.background = { color: BG_COLOR };
 
   s1.addText('iQOO HACKATHON 2026 · DEVELOPER TOOLS & OPEN INNOVATION', {
-    x: 1.0, y: 1.5, w: 11.0, h: 0.4,
-    fontSize: 12, bold: true, color: ACCENT_ORANGE, fontFace: 'Arial', letterSpacing: 2,
+    x: 0.8, y: 1.3, w: 11.73, h: 0.35,
+    fontSize: 11, bold: true, color: ACCENT_ORANGE, fontFace: 'Arial', letterSpacing: 2,
   });
 
   s1.addText('⚡ PocketOps', {
-    x: 1.0, y: 2.0, w: 11.0, h: 1.1,
+    x: 0.8, y: 1.7, w: 11.73, h: 1.1,
     fontSize: 48, bold: true, color: TEXT_WHITE, fontFace: 'Arial',
   });
 
   s1.addText('On-Device Resilient Operations & Hot-Standby Enclave', {
-    x: 1.0, y: 3.1, w: 11.0, h: 0.6,
+    x: 0.8, y: 2.85, w: 11.73, h: 0.55,
     fontSize: 20, bold: true, color: ACCENT_CYAN, fontFace: 'Arial',
   });
 
   s1.addText('"When one device fails, your work should never have to stop."', {
-    x: 1.0, y: 3.8, w: 11.0, h: 0.5,
-    fontSize: 14, italic: true, color: TEXT_MUTED, fontFace: 'Arial',
+    x: 0.8, y: 3.5, w: 11.73, h: 0.45,
+    fontSize: 13.5, italic: true, color: TEXT_MUTED, fontFace: 'Arial',
   });
 
-  // Feature pills on title slide
   const pills = [
     { text: '🧠 Local Open-Source SLM Core (Qwen 2.5-Coder / Gemma 2B)', color: ACCENT_PURPLE },
     { text: '🔗 vivo/iQOO Office Kit Bridge (Wi-Fi Aware & BLE 5.4)', color: ACCENT_CYAN },
@@ -86,118 +84,119 @@ async function createDeck() {
   ];
 
   pills.forEach((p, idx) => {
+    const col = idx % 2;
+    const row = Math.floor(idx / 2);
+    const x = 0.8 + col * 5.95;
+    const y = 4.3 + row * 1.1;
+
     s1.addShape(pptx.ShapeType.roundRect, {
-      x: 1.0 + (idx % 2) * 5.6,
-      y: 4.6 + Math.floor(idx / 2) * 0.9,
-      w: 5.3, h: 0.7,
+      x, y, w: 5.65, h: 0.85,
       rectRadius: 0.1,
       fill: { color: CARD_BG },
-      line: { color: '2A314A', width: 1 },
+      line: { color: CARD_BORDER, width: 1 },
     });
     s1.addText(p.text, {
-      x: 1.15 + (idx % 2) * 5.6,
-      y: 4.6 + Math.floor(idx / 2) * 0.9,
-      w: 5.0, h: 0.7,
+      x: x + 0.25, y: y + 0.12, w: 5.15, h: 0.6,
       fontSize: 11, bold: true, color: p.color, fontFace: 'Arial',
     });
   });
 
   // -------------------------------------------------------------
-  // SLIDE 2: THE PROBLEM
+  // SLIDE 2: THE PROBLEM (3 Perfectly Sized Columns)
   // -------------------------------------------------------------
   const s2 = addBaseSlide(
     'The Critical Dilemma: Sudden Hardware Failures & Lost Context',
-    'Why existing cloud IDEs and ecosystem continuity solutions fail developers during sudden disruptions.'
+    'Why cloud IDEs and existing ecosystem continuity tools leave developers stranded during sudden disruptions.'
   );
 
   const problems = [
     {
-      title: '🚨 Sudden Laptop Crash / Battery Death',
-      desc: 'When a workstation powers off unexpectedly during code deployments, active editor buffers and in-flight terminal commands are permanently lost.',
       tag: 'CONTEXT WIPEOUT',
       tagColor: 'EF4444',
+      title: '🚨 Sudden Crash / Power Death',
+      desc: 'When a workstation powers off unexpectedly during code deployments, active editor buffers and in-flight terminal commands are permanently lost.',
     },
     {
-      title: '☁️ Cloud IDEs Require 100% Internet',
-      desc: 'Cloud environments (Codespaces) immediately sever and freeze without active Wi-Fi, leaving field engineers and travelers stranded with zero access.',
       tag: 'ZERO RESILIENCE',
       tagColor: 'F59E0B',
+      title: '☁️ Cloud IDEs Need 100% Internet',
+      desc: 'Cloud environments (Codespaces) immediately sever and freeze without active Wi-Fi, leaving field engineers stranded with zero offline access.',
     },
     {
-      title: '🔀 Painful Reconnection & File Conflicts',
-      desc: 'Rewriting work from memory after reboot causes duplicate code, messy file overwrites, and painful Git branch conflicts.',
       tag: 'MERGE CONFLICTS',
       tagColor: '8B5CF6',
+      title: '🔀 Painful Reconnection Overwrites',
+      desc: 'Rewriting work from memory after reboot causes duplicate code, messy file overwrites, and painful Git branch merge conflicts.',
     },
   ];
 
   problems.forEach((p, i) => {
-    const x = 0.8 + i * 3.9;
+    const x = 0.8 + i * 4.04;
     s2.addShape(pptx.ShapeType.roundRect, {
-      x, y: 1.9, w: 3.7, h: 4.6,
-      rectRadius: 0.15,
+      x, y: 1.85, w: 3.65, h: 4.75,
+      rectRadius: 0.12,
       fill: { color: CARD_BG },
-      line: { color: '22283A', width: 1 },
+      line: { color: CARD_BORDER, width: 1 },
     });
 
     s2.addText(p.tag, {
-      x: x + 0.3, y: 2.2, w: 3.1, h: 0.3,
-      fontSize: 9, bold: true, color: p.tagColor, fontFace: 'Arial', letterSpacing: 1,
+      x: x + 0.3, y: 2.15, w: 3.05, h: 0.3,
+      fontSize: 9.5, bold: true, color: p.tagColor, fontFace: 'Arial', letterSpacing: 1,
     });
 
     s2.addText(p.title, {
-      x: x + 0.3, y: 2.6, w: 3.1, h: 0.7,
+      x: x + 0.3, y: 2.55, w: 3.05, h: 0.65,
       fontSize: 14, bold: true, color: TEXT_WHITE, fontFace: 'Arial',
     });
 
     s2.addText(p.desc, {
-      x: x + 0.3, y: 3.4, w: 3.1, h: 2.8,
+      x: x + 0.3, y: 3.35, w: 3.05, h: 3.0,
       fontSize: 11, color: TEXT_MUTED, fontFace: 'Arial', lineSpacing: 18,
     });
   });
 
   // -------------------------------------------------------------
-  // SLIDE 3: STACK RULE COMPLIANCE (LOCAL SLM + OFFICE KIT)
+  // SLIDE 3: STACK RULE COMPLIANCE (2 Symmetrical Big Cards)
   // -------------------------------------------------------------
   const s3 = addBaseSlide(
     'Official Hackathon Stack Rule Compliance',
     'Open-Source SLM at the core with active smartphone loop via vivo/iQOO Office Kit Bridge.'
   );
 
-  // Box 1: Local Open-Source SLM
+  // Card 1: Local Open-Source SLM
   s3.addShape(pptx.ShapeType.roundRect, {
-    x: 0.8, y: 1.8, w: 5.7, h: 4.8,
-    rectRadius: 0.15,
+    x: 0.8, y: 1.85, w: 5.65, h: 4.75,
+    rectRadius: 0.12,
     fill: { color: CARD_BG },
     line: { color: ACCENT_PURPLE, width: 1.5 },
   });
   s3.addText('🧠 LOCAL OPEN-SOURCE SLM CORE', {
-    x: 1.1, y: 2.1, w: 5.1, h: 0.4,
+    x: 1.1, y: 2.15, w: 5.05, h: 0.35,
     fontSize: 13, bold: true, color: ACCENT_PURPLE, fontFace: 'Arial',
   });
-  s3.addText('• Model: Qwen 2.5-Coder (1.5B) & Gemma 2B Local SLM\n• Quantization: 4-bit INT4 for on-device mobile NPU execution\n• 0ms Cloud Latency: 100% Airplane Mode offline operation\n• Local Syntax Auditing: Instant safety evaluation of emergency hotpatches before committing\n• Zero IP Leakage: Proprietary enterprise code never leaves device flash', {
-    x: 1.1, y: 2.6, w: 5.1, h: 3.7,
+  s3.addText('• Model: Qwen 2.5-Coder (1.5B) & Gemma 2B Local SLM\n• Quantization: 4-bit INT4 for on-device mobile NPU execution\n• 0ms Cloud Latency: 100% Airplane Mode offline operation\n• Local Syntax Auditing: Instant safety evaluation of emergency hotpatches before committing\n• Zero IP Leakage: Proprietary enterprise code never leaves device flash storage', {
+    x: 1.1, y: 2.65, w: 5.05, h: 3.7,
     fontSize: 11, color: TEXT_WHITE, fontFace: 'Arial', lineSpacing: 22,
   });
 
-  // Box 2: Office Kit Bridge
+  // Card 2: Office Kit Bridge
   s3.addShape(pptx.ShapeType.roundRect, {
-    x: 6.8, y: 1.8, w: 5.7, h: 4.8,
-    rectRadius: 0.15,
+    x: 6.88, y: 1.85, w: 5.65, h: 4.75,
+    rectRadius: 0.12,
     fill: { color: CARD_BG },
     line: { color: ACCENT_ORANGE, width: 1.5 },
   });
   s3.addText('📱 PHONE IN THE LOOP (OFFICE KIT BRIDGE)', {
-    x: 7.1, y: 2.1, w: 5.1, h: 0.4,
+    x: 7.18, y: 2.15, w: 5.05, h: 0.35,
     fontSize: 13, bold: true, color: ACCENT_ORANGE, fontFace: 'Arial',
   });
-  s3.addText('• Continuous Heartbeat: Wi-Fi Aware & BLE 5.4 state replication\n• Bidirectional Clipboard: Live real-time stream between laptop & phone\n• Hot-Standby Session Handover: Recovers exact cursor line & terminal state within 300ms\n• Visual 3-Way Git Diff: One-click assisted patch merge to laptop repo\n• Enclave Security: Hardware-backed Android Keystore AES-256-GCM', {
-    x: 7.1, y: 2.6, w: 5.1, h: 3.7,
+  s3.addText('• Continuous Heartbeat: Wi-Fi Aware & BLE 5.4 state replication\n• Bidirectional Clipboard: Live real-time stream between laptop & phone\n• Hot-Standby Handover: Recovers exact cursor line & terminal state within 300ms\n• Visual 3-Way Git Diff: One-click assisted patch merge to laptop repo\n• Enclave Security: Hardware-backed Android Keystore AES-256-GCM', {
+    x: 7.18, y: 2.65, w: 5.05, h: 3.7,
     fontSize: 11, color: TEXT_WHITE, fontFace: 'Arial', lineSpacing: 22,
   });
 
   // -------------------------------------------------------------
-  // SLIDE 4: SYSTEM ARCHITECTURE & 4 CORE PILLARS
+  // SLIDE 4: 4 CORE PILLARS (2x2 Grid)
   // -------------------------------------------------------------
   const s4 = addBaseSlide(
     'PocketOps 4 Core Architectural Pillars',
@@ -212,32 +211,34 @@ async function createDeck() {
   ];
 
   pillars.forEach((p, idx) => {
-    const x = 0.8 + (idx % 2) * 5.9;
-    const y = 1.9 + Math.floor(idx / 2) * 2.4;
+    const col = idx % 2;
+    const row = Math.floor(idx / 2);
+    const x = 0.8 + col * 6.08;
+    const y = 1.85 + row * 2.5;
 
     s4.addShape(pptx.ShapeType.roundRect, {
-      x, y, w: 5.6, h: 2.1,
+      x, y, w: 5.65, h: 2.25,
       rectRadius: 0.12,
       fill: { color: CARD_BG },
-      line: { color: '242B3E', width: 1 },
+      line: { color: CARD_BORDER, width: 1 },
     });
 
     s4.addText(p.title, {
-      x: x + 0.3, y: y + 0.25, w: 3.2, h: 0.35,
+      x: x + 0.3, y: y + 0.25, w: 3.3, h: 0.35,
       fontSize: 13, bold: true, color: p.col, fontFace: 'Arial',
     });
     s4.addText(p.sub, {
-      x: x + 3.6, y: y + 0.25, w: 1.7, h: 0.35,
-      fontSize: 9, bold: true, color: TEXT_MUTED, fontFace: 'Arial', align: 'right',
+      x: x + 3.6, y: y + 0.25, w: 1.75, h: 0.35,
+      fontSize: 9.5, bold: true, color: TEXT_MUTED, fontFace: 'Arial', align: 'right',
     });
     s4.addText(p.desc, {
-      x: x + 0.3, y: y + 0.7, w: 5.0, h: 1.2,
-      fontSize: 10.5, color: TEXT_WHITE, fontFace: 'Arial', lineSpacing: 16,
+      x: x + 0.3, y: y + 0.7, w: 5.05, h: 1.35,
+      fontSize: 10.5, color: TEXT_WHITE, fontFace: 'Arial', lineSpacing: 17,
     });
   });
 
   // -------------------------------------------------------------
-  // SLIDE 5: 60-SECOND JUDGE DEMO FLOW
+  // SLIDE 5: 60-SECOND DEMO FLOW (4 Equal Columns)
   // -------------------------------------------------------------
   const s5 = addBaseSlide(
     'The 60-Second Fail-Proof Judge Demonstration Flow',
@@ -252,32 +253,32 @@ async function createDeck() {
   ];
 
   demoStages.forEach((st, i) => {
-    const x = 0.8 + i * 2.95;
+    const x = 0.8 + i * 3.01;
     s5.addShape(pptx.ShapeType.roundRect, {
-      x, y: 1.9, w: 2.75, h: 4.6,
+      x, y: 1.85, w: 2.7, h: 4.75,
       rectRadius: 0.12,
       fill: { color: CARD_BG },
-      line: { color: i === 1 ? ACCENT_ORANGE : i === 3 ? ACCENT_GREEN : '2A314A', width: 1.5 },
+      line: { color: i === 1 ? ACCENT_ORANGE : i === 3 ? ACCENT_GREEN : CARD_BORDER, width: 1.5 },
     });
 
     s5.addText(st.num, {
-      x: x + 0.2, y: 2.2, w: 2.35, h: 0.3,
+      x: x + 0.2, y: 2.15, w: 2.3, h: 0.3,
       fontSize: 10, bold: true, color: i === 1 ? ACCENT_ORANGE : i === 3 ? ACCENT_GREEN : ACCENT_CYAN, fontFace: 'Arial',
     });
 
     s5.addText(st.title, {
-      x: x + 0.2, y: 2.6, w: 2.35, h: 0.6,
+      x: x + 0.2, y: 2.55, w: 2.3, h: 0.65,
       fontSize: 13, bold: true, color: TEXT_WHITE, fontFace: 'Arial',
     });
 
     s5.addText(st.desc, {
-      x: x + 0.2, y: 3.3, w: 2.35, h: 2.8,
+      x: x + 0.2, y: 3.3, w: 2.3, h: 3.0,
       fontSize: 10.5, color: TEXT_MUTED, fontFace: 'Arial', lineSpacing: 17,
     });
   });
 
   // -------------------------------------------------------------
-  // SLIDE 6: COMPETITIVE ADVANTAGE MATRIX
+  // SLIDE 6: COMPETITIVE MATRIX TABLE
   // -------------------------------------------------------------
   const s6 = addBaseSlide(
     'Competitive Differentiation vs. Existing Solutions',
@@ -293,7 +294,6 @@ async function createDeck() {
     ['Post-Crash Git Re-Sync', 'None', 'Remote Git push required', 'Visual 3-Way Git Diff Inspector'],
   ];
 
-  // Draw Table
   const tableData = [
     matrixHeaders.map(h => ({ text: h, options: { bold: true, color: ACCENT_ORANGE, fill: '1A2035', fontSize: 10 } })),
     ...matrixRows.map((row, rIdx) =>
@@ -310,8 +310,8 @@ async function createDeck() {
   ];
 
   s6.addTable(tableData, {
-    x: 0.8, y: 1.9, w: 11.7, h: 4.6,
-    colW: [2.5, 2.9, 2.9, 3.4],
+    x: 0.8, y: 1.85, w: 11.73, h: 4.75,
+    colW: [2.5, 2.9, 2.9, 3.43],
     border: { color: '2A314A', width: 0.5 },
   });
 
@@ -324,15 +324,15 @@ async function createDeck() {
   );
 
   s7.addShape(pptx.ShapeType.roundRect, {
-    x: 0.8, y: 1.9, w: 11.7, h: 4.6,
-    rectRadius: 0.15,
+    x: 0.8, y: 1.85, w: 11.73, h: 4.75,
+    rectRadius: 0.12,
     fill: { color: CARD_BG },
     line: { color: ACCENT_ORANGE, width: 1.5 },
   });
 
   s7.addText('🏆 Why PocketOps Wins the iQOO Hackathon:', {
-    x: 1.2, y: 2.3, w: 10.9, h: 0.5,
-    fontSize: 16, bold: true, color: ACCENT_ORANGE, fontFace: 'Arial',
+    x: 1.2, y: 2.2, w: 10.9, h: 0.45,
+    fontSize: 15, bold: true, color: ACCENT_ORANGE, fontFace: 'Arial',
   });
 
   const takeaways = [
@@ -345,14 +345,14 @@ async function createDeck() {
   ];
 
   s7.addText(takeaways.join('\n\n'), {
-    x: 1.2, y: 2.9, w: 10.9, h: 3.3,
-    fontSize: 11, color: TEXT_WHITE, fontFace: 'Arial',
+    x: 1.2, y: 2.8, w: 10.9, h: 3.5,
+    fontSize: 10.5, color: TEXT_WHITE, fontFace: 'Arial',
   });
 
   // Save presentation
   const outputPath = path.resolve(__dirname, '../PocketOps_Presentation.pptx');
   await pptx.writeFile({ fileName: outputPath });
-  console.log(`Presentation successfully created at: ${outputPath}`);
+  console.log(`Presentation successfully regenerated at: ${outputPath}`);
 }
 
 createDeck().catch(err => {
